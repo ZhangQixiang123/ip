@@ -4,6 +4,9 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -11,6 +14,34 @@ public class Duke {
     private static final String DATA_DIR = "data";
     private static final String DATA_FILE = "duke.txt";
     private static final String FILE_PATH = DATA_DIR + File.separator + DATA_FILE;
+
+    // Date formatters
+    private static final DateTimeFormatter OUTPUT_FORMAT = DateTimeFormatter.ofPattern("MMM d yyyy, h:mma");
+    private static final DateTimeFormatter FILE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm");
+
+    private static LocalDateTime parseDateTime(String input) {
+        // Try formats with time
+        String[] formatsWithTime = {"d/M/yyyy HHmm", "yyyy-MM-dd HHmm"};
+        for (String pattern : formatsWithTime) {
+            try {
+                return LocalDateTime.parse(input, DateTimeFormatter.ofPattern(pattern));
+            } catch (DateTimeParseException e) {
+                // Try next format
+            }
+        }
+        // Try formats without time (default to midnight)
+        String[] formatsDateOnly = {"d/M/yyyy", "yyyy-MM-dd"};
+        for (String pattern : formatsDateOnly) {
+            try {
+                return LocalDateTime.parse(input + " 0000",
+                        DateTimeFormatter.ofPattern(pattern + " HHmm"));
+            } catch (DateTimeParseException e) {
+                // Try next format
+            }
+        }
+        return null; // Could not parse - will use string fallback
+    }
+
     private static class Task {
         String name;
         boolean done;
@@ -51,42 +82,60 @@ public class Duke {
     }
 
     private static class Deadline extends Task {
-        String by;
+        LocalDateTime byDateTime;
+        String byString; // Fallback if date can't be parsed
 
         Deadline(String name, String by) {
             super(name);
-            this.by = by;
+            this.byDateTime = parseDateTime(by);
+            this.byString = by;
+        }
+
+        Deadline(String name, LocalDateTime by) {
+            super(name);
+            this.byDateTime = by;
+            this.byString = null;
         }
 
         @Override
         String toFileString() {
-            return "D | " + super.toFileString() + " | " + by;
+            String byStr = byDateTime != null ? byDateTime.format(FILE_FORMAT) : byString;
+            return "D | " + super.toFileString() + " | " + byStr;
         }
 
         @Override
         public String toString() {
-            return "[D]" + super.toString() + " (by: " + by + ")";
+            String byStr = byDateTime != null ? byDateTime.format(OUTPUT_FORMAT) : byString;
+            return "[D]" + super.toString() + " (by: " + byStr + ")";
         }
     }
 
     private static class Event extends Task {
-        String from;
-        String to;
+        LocalDateTime fromDateTime;
+        LocalDateTime toDateTime;
+        String fromString; // Fallback if date can't be parsed
+        String toString; // Fallback if date can't be parsed
 
         Event(String name, String from, String to) {
             super(name);
-            this.from = from;
-            this.to = to;
+            this.fromDateTime = parseDateTime(from);
+            this.toDateTime = parseDateTime(to);
+            this.fromString = from;
+            this.toString = to;
         }
 
         @Override
         String toFileString() {
-            return "E | " + super.toFileString() + " | " + from + " | " + to;
+            String fromStr = fromDateTime != null ? fromDateTime.format(FILE_FORMAT) : fromString;
+            String toStr = toDateTime != null ? toDateTime.format(FILE_FORMAT) : toString;
+            return "E | " + super.toFileString() + " | " + fromStr + " | " + toStr;
         }
 
         @Override
         public String toString() {
-            return "[E]" + super.toString() + " (from: " + from + " to: " + to + ")";
+            String fromStr = fromDateTime != null ? fromDateTime.format(OUTPUT_FORMAT) : fromString;
+            String toStr = toDateTime != null ? toDateTime.format(OUTPUT_FORMAT) : toString;
+            return "[E]" + super.toString() + " (from: " + fromStr + " to: " + toStr + ")";
         }
     }
 
