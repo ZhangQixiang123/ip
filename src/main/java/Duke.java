@@ -1,7 +1,16 @@
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Duke {
+    private static final String DATA_DIR = "data";
+    private static final String DATA_FILE = "duke.txt";
+    private static final String FILE_PATH = DATA_DIR + File.separator + DATA_FILE;
     private static class Task {
         String name;
         boolean done;
@@ -13,6 +22,10 @@ public class Duke {
 
         String getStatusIcon() {
             return done ? "X" : " ";
+        }
+
+        String toFileString() {
+            return (done ? "1" : "0") + " | " + name;
         }
 
         @Override
@@ -27,6 +40,11 @@ public class Duke {
         }
 
         @Override
+        String toFileString() {
+            return "T | " + super.toFileString();
+        }
+
+        @Override
         public String toString() {
             return "[T]" + super.toString();
         }
@@ -38,6 +56,11 @@ public class Duke {
         Deadline(String name, String by) {
             super(name);
             this.by = by;
+        }
+
+        @Override
+        String toFileString() {
+            return "D | " + super.toFileString() + " | " + by;
         }
 
         @Override
@@ -57,21 +80,95 @@ public class Duke {
         }
 
         @Override
+        String toFileString() {
+            return "E | " + super.toFileString() + " | " + from + " | " + to;
+        }
+
+        @Override
         public String toString() {
             return "[E]" + super.toString() + " (from: " + from + " to: " + to + ")";
         }
     }
+
+    private static void saveTasks(ArrayList<Task> tasks) {
+        try {
+            File dir = new File(DATA_DIR);
+            if (!dir.exists()) {
+                dir.mkdirs();
+            }
+            BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_PATH));
+            for (Task task : tasks) {
+                writer.write(task.toFileString());
+                writer.newLine();
+            }
+            writer.close();
+        } catch (IOException e) {
+            System.out.println(" Warning: Could not save tasks to file.");
+        }
+    }
+
+    private static ArrayList<Task> loadTasks() {
+        ArrayList<Task> tasks = new ArrayList<>();
+        File file = new File(FILE_PATH);
+        if (!file.exists()) {
+            return tasks;
+        }
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(file));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                Task task = parseTask(line);
+                if (task != null) {
+                    tasks.add(task);
+                }
+            }
+            reader.close();
+        } catch (IOException e) {
+            System.out.println(" Warning: Could not load tasks from file.");
+        }
+        return tasks;
+    }
+
+    private static Task parseTask(String line) {
+        try {
+            String[] parts = line.split(" \\| ");
+            String type = parts[0];
+            boolean isDone = parts[1].equals("1");
+            String name = parts[2];
+
+            Task task;
+            switch (type) {
+            case "T":
+                task = new ToDo(name);
+                break;
+            case "D":
+                task = new Deadline(name, parts[3]);
+                break;
+            case "E":
+                task = new Event(name, parts[3], parts[4]);
+                break;
+            default:
+                return null;
+            }
+            task.done = isDone;
+            return task;
+        } catch (Exception e) {
+            System.out.println(" Warning: Skipping corrupted line: " + line);
+            return null;
+        }
+    }
+
     public static void main(String[] args) {
         String name = "fzjjs";
         String line = "____________________________________________________________";
         Scanner scanner = new Scanner(System.in);
 
+        ArrayList<Task> ls = loadTasks();
+
         System.out.println(line);
         System.out.println(" Hello! I'm " + name);
         System.out.println(" What can I do for you?");
         System.out.println(line);
-
-        ArrayList<Task> ls = new ArrayList<>();
 
         while (true) {
             String input = scanner.nextLine();
@@ -94,6 +191,7 @@ public class Duke {
                         System.out.println(" OOPS!!! Task number " + (index + 1) + " does not exist.");
                     } else {
                         ls.get(index).done = true;
+                        saveTasks(ls);
                         System.out.println(" Nice! I've marked this task as done:");
                         System.out.println("   " + ls.get(index));
                     }
@@ -107,6 +205,7 @@ public class Duke {
                         System.out.println(" OOPS!!! Task number " + (index + 1) + " does not exist.");
                     } else {
                         ls.get(index).done = false;
+                        saveTasks(ls);
                         System.out.println(" OK, I've marked this task as not done yet:");
                         System.out.println("   " + ls.get(index));
                     }
@@ -120,6 +219,7 @@ public class Duke {
                         System.out.println(" OOPS!!! Task number " + (index + 1) + " does not exist.");
                     } else {
                         Task removed = ls.remove(index);
+                        saveTasks(ls);
                         System.out.println(" Noted. I've removed this task:");
                         System.out.println("   " + removed);
                         System.out.println(" Now you have " + ls.size() + " tasks in the list.");
@@ -136,6 +236,7 @@ public class Duke {
                 } else {
                     Task task = new ToDo(taskName);
                     ls.add(task);
+                    saveTasks(ls);
                     System.out.println(" Got it. I've added this task:");
                     System.out.println("   " + task);
                     System.out.println(" Now you have " + ls.size() + " tasks in the list.");
@@ -158,6 +259,7 @@ public class Duke {
                     } else {
                         Task task = new Deadline(taskName, by);
                         ls.add(task);
+                        saveTasks(ls);
                         System.out.println(" Got it. I've added this task:");
                         System.out.println("   " + task);
                         System.out.println(" Now you have " + ls.size() + " tasks in the list.");
@@ -187,6 +289,7 @@ public class Duke {
                     } else {
                         Task task = new Event(taskName, from, to);
                         ls.add(task);
+                        saveTasks(ls);
                         System.out.println(" Got it. I've added this task:");
                         System.out.println("   " + task);
                         System.out.println(" Now you have " + ls.size() + " tasks in the list.");
