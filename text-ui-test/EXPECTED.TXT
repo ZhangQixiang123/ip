@@ -3,63 +3,48 @@ ____________________________________________________________
  What can I do for you?
 ____________________________________________________________
 ____________________________________________________________
- OOPS!!! I don't know what that means :-(
- Try: todo, deadline, event, list, mark, unmark, bye
-____________________________________________________________
-____________________________________________________________
- OOPS!!! The description of a todo cannot be empty.
-____________________________________________________________
-____________________________________________________________
  Got it. I've added this task:
    [T][ ] read book
  Now you have 1 tasks in the list.
 ____________________________________________________________
 ____________________________________________________________
- OOPS!!! The description of a deadline cannot be empty.
-____________________________________________________________
-____________________________________________________________
- OOPS!!! Please specify a deadline using /by.
- Usage: deadline <description> /by <date>
+ Got it. I've added this task:
+   [T][ ] join sports club
+ Now you have 2 tasks in the list.
 ____________________________________________________________
 ____________________________________________________________
  Got it. I've added this task:
    [D][ ] return book (by: Sunday)
- Now you have 2 tasks in the list.
-____________________________________________________________
-____________________________________________________________
- OOPS!!! The description of an event cannot be empty.
-____________________________________________________________
-____________________________________________________________
- OOPS!!! Please specify event times using /from and /to.
- Usage: event <description> /from <start> /to <end>
+ Now you have 3 tasks in the list.
 ____________________________________________________________
 ____________________________________________________________
  Got it. I've added this task:
-   [E][ ] meeting (from: Mon 2pm to: 4pm)
+   [E][ ] project meeting (from: Mon 2pm to: 4pm)
+ Now you have 4 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+ Here are the tasks in your list:
+ 1.[T][ ] read book
+ 2.[T][ ] join sports club
+ 3.[D][ ] return book (by: Sunday)
+ 4.[E][ ] project meeting (from: Mon 2pm to: 4pm)
+____________________________________________________________
+____________________________________________________________
+ Noted. I've removed this task:
+   [D][ ] return book (by: Sunday)
  Now you have 3 tasks in the list.
 ____________________________________________________________
 ____________________________________________________________
  Here are the tasks in your list:
  1.[T][ ] read book
- 2.[D][ ] return book (by: Sunday)
- 3.[E][ ] meeting (from: Mon 2pm to: 4pm)
+ 2.[T][ ] join sports club
+ 3.[E][ ] project meeting (from: Mon 2pm to: 4pm)
 ____________________________________________________________
 ____________________________________________________________
  OOPS!!! Please specify a task number.
 ____________________________________________________________
 ____________________________________________________________
- OOPS!!! Please enter a valid task number.
-____________________________________________________________
-____________________________________________________________
  OOPS!!! Task number 99 does not exist.
-____________________________________________________________
-____________________________________________________________
- Nice! I've marked this task as done:
-   [T][X] read book
-____________________________________________________________
-____________________________________________________________
- OK, I've marked this task as not done yet:
-   [T][ ] read book
 ____________________________________________________________
 ____________________________________________________________
  Bye. Hope to see you again soon!

@@ -85,7 +85,7 @@ public class Duke {
                 for (int i = 0; i < ls.size(); i++) {
                     System.out.println(" " + (i + 1) + "." + ls.get(i));
                 }
-            } else if (input.equals("mark") || input.equals("unmark")) {
+            } else if (input.equals("mark") || input.equals("unmark") || input.equals("delete")) {
                 System.out.println(" OOPS!!! Please specify a task number.");
             } else if (input.startsWith("mark ")) {
                 try {
@@ -109,6 +109,20 @@ public class Duke {
                         ls.get(index).done = false;
                         System.out.println(" OK, I've marked this task as not done yet:");
                         System.out.println("   " + ls.get(index));
+                    }
+                } catch (NumberFormatException e) {
+                    System.out.println(" OOPS!!! Please enter a valid task number.");
+                }
+            } else if (input.startsWith("delete ")) {
+                try {
+                    int index = Integer.parseInt(input.substring(7)) - 1;
+                    if (index < 0 || index >= ls.size()) {
+                        System.out.println(" OOPS!!! Task number " + (index + 1) + " does not exist.");
+                    } else {
+                        Task removed = ls.remove(index);
+                        System.out.println(" Noted. I've removed this task:");
+                        System.out.println("   " + removed);
+                        System.out.println(" Now you have " + ls.size() + " tasks in the list.");
                     }
                 } catch (NumberFormatException e) {
                     System.out.println(" OOPS!!! Please enter a valid task number.");
@@ -180,7 +194,7 @@ public class Duke {
                 }
             } else {
                 System.out.println(" OOPS!!! I don't know what that means :-(");
-                System.out.println(" Try: todo, deadline, event, list, mark, unmark, bye");
+                System.out.println(" Try: todo, deadline, event, list, mark, unmark, delete, bye");
             }
             System.out.println(line);
         }

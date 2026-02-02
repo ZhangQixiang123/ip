@@ -1,16 +1,10 @@
-blah
-todo
 todo read book
-deadline
-deadline return book
+todo join sports club
 deadline return book /by Sunday
-event
-event project meeting
-event meeting /from Mon 2pm /to 4pm
+event project meeting /from Mon 2pm /to 4pm
 list
-mark
-mark abc
-mark 99
-mark 1
-unmark 1
+delete 3
+list
+delete
+delete 99
 bye
