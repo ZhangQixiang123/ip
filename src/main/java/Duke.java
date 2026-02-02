@@ -2,6 +2,15 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Duke {
+    private static class Task {
+        String name;
+        boolean done;
+
+        Task(String name, boolean done) {
+            this.name = name;
+            this.done = done;
+        }
+    }
     public static void main(String[] args) {
         String name = "fzjjs";
         String line = "____________________________________________________________";
@@ -12,7 +21,7 @@ public class Duke {
         System.out.println(" What can I do for you?");
         System.out.println(line);
 
-        ArrayList<String> ls = new ArrayList<>();
+        ArrayList<Task> ls = new ArrayList<>();
 
         while (true) {
             String input = scanner.nextLine();
@@ -25,8 +34,15 @@ public class Duke {
                 for (int i = 0; i < ls.size(); i++) {
                     System.out.println(i+1 + ". " + ls.get(i));
                 }
-            } else {
-                ls.add(input);
+            } else if (input.startsWith("mark ")) {
+                int index = Integer.parseInt(input.substring(5));
+                ls.get(index-1).done = true;
+            } else if (input.startsWith("unmark ")) {
+                int index = Integer.parseInt(input.substring(7));
+                ls.get(index-1).done = false;
+            }
+            else {
+                ls.add(new Task(input, false));
                 System.out.println("added: " + input);
             }
         }
