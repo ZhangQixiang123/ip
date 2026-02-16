@@ -11,44 +11,33 @@ import duke.task.ToDo;
 public class Parser {
 
     /**
-     * Parses and executes a single user command.
-     * Returns false if the program should exit, true otherwise.
+     * Parses and executes a single user command, returning the response as a string.
      */
-    public static boolean executeCommand(String input, TaskList tasks, Ui ui, Storage storage) {
+    public static String processCommand(String input, TaskList tasks, Storage storage) throws DukeException {
         String command = getCommandWord(input);
         String arguments = getArguments(input);
 
         switch (command) {
         case "bye":
-            ui.showGoodbye();
-            return false;
+            return "Bye. Hope to see you again soon!";
         case "list":
-            ui.showTaskList(tasks);
-            break;
+            return formatTaskList(tasks);
         case "mark":
-            handleMark(arguments, tasks, ui, storage);
-            break;
+            return handleMark(arguments, tasks, storage);
         case "unmark":
-            handleUnmark(arguments, tasks, ui, storage);
-            break;
+            return handleUnmark(arguments, tasks, storage);
         case "delete":
-            handleDelete(arguments, tasks, ui, storage);
-            break;
+            return handleDelete(arguments, tasks, storage);
         case "todo":
-            handleToDo(arguments, tasks, ui, storage);
-            break;
+            return handleToDo(arguments, tasks, storage);
         case "deadline":
-            handleDeadline(arguments, tasks, ui, storage);
-            break;
+            return handleDeadline(arguments, tasks, storage);
         case "event":
-            handleEvent(arguments, tasks, ui, storage);
-            break;
+            return handleEvent(arguments, tasks, storage);
         default:
-            ui.showError("I don't know what that means :-(");
-            System.out.println(" Try: todo, deadline, event, list, mark, unmark, delete, bye");
-            break;
+            throw new DukeException("I don't know what that means :-(\n"
+                    + " Try: todo, deadline, event, list, mark, unmark, delete, bye");
         }
-        return true;
     }
 
     private static String getCommandWord(String input) {
@@ -60,112 +49,107 @@ public class Parser {
         return parts.length > 1 ? parts[1].trim() : "";
     }
 
-    private static void handleMark(String arguments, TaskList tasks, Ui ui, Storage storage) {
-        try {
-            int index = parseTaskIndex(arguments);
-            tasks.markTask(index);
-            saveTasks(tasks, storage, ui);
-            ui.showTaskMarked(tasks.getTask(index));
-        } catch (DukeException e) {
-            ui.showError(e.getMessage());
+    private static String formatTaskList(TaskList tasks) {
+        StringBuilder sb = new StringBuilder("Here are the tasks in your list:");
+        for (int i = 0; i < tasks.size(); i++) {
+            try {
+                sb.append("\n ").append(i + 1).append(".").append(tasks.getTask(i));
+            } catch (DukeException e) {
+                // Should not happen during iteration
+            }
         }
+        return sb.toString();
     }
 
-    private static void handleUnmark(String arguments, TaskList tasks, Ui ui, Storage storage) {
-        try {
-            int index = parseTaskIndex(arguments);
-            tasks.unmarkTask(index);
-            saveTasks(tasks, storage, ui);
-            ui.showTaskUnmarked(tasks.getTask(index));
-        } catch (DukeException e) {
-            ui.showError(e.getMessage());
-        }
+    private static String formatTaskAdded(Task task, int totalTasks) {
+        return "Got it. I've added this task:\n   " + task
+                + "\n Now you have " + totalTasks + " tasks in the list.";
     }
 
-    private static void handleDelete(String arguments, TaskList tasks, Ui ui, Storage storage) {
-        try {
-            int index = parseTaskIndex(arguments);
-            Task removed = tasks.deleteTask(index);
-            saveTasks(tasks, storage, ui);
-            ui.showTaskDeleted(removed, tasks.size());
-        } catch (DukeException e) {
-            ui.showError(e.getMessage());
-        }
+    private static String handleMark(String arguments, TaskList tasks, Storage storage) throws DukeException {
+        int index = parseTaskIndex(arguments);
+        tasks.markTask(index);
+        saveTasks(tasks, storage);
+        return "Nice! I've marked this task as done:\n   " + tasks.getTask(index);
     }
 
-    private static void handleToDo(String arguments, TaskList tasks, Ui ui, Storage storage) {
+    private static String handleUnmark(String arguments, TaskList tasks, Storage storage) throws DukeException {
+        int index = parseTaskIndex(arguments);
+        tasks.unmarkTask(index);
+        saveTasks(tasks, storage);
+        return "OK, I've marked this task as not done yet:\n   " + tasks.getTask(index);
+    }
+
+    private static String handleDelete(String arguments, TaskList tasks, Storage storage) throws DukeException {
+        int index = parseTaskIndex(arguments);
+        Task removed = tasks.deleteTask(index);
+        saveTasks(tasks, storage);
+        return "Noted. I've removed this task:\n   " + removed
+                + "\n Now you have " + tasks.size() + " tasks in the list.";
+    }
+
+    private static String handleToDo(String arguments, TaskList tasks, Storage storage) throws DukeException {
         if (arguments.isEmpty()) {
-            ui.showError("The description of a todo cannot be empty.");
-            return;
+            throw new DukeException("The description of a todo cannot be empty.");
         }
         Task task = new ToDo(arguments);
         tasks.addTask(task);
-        saveTasks(tasks, storage, ui);
-        ui.showTaskAdded(task, tasks.size());
+        saveTasks(tasks, storage);
+        return formatTaskAdded(task, tasks.size());
     }
 
-    private static void handleDeadline(String arguments, TaskList tasks, Ui ui, Storage storage) {
+    private static String handleDeadline(String arguments, TaskList tasks, Storage storage) throws DukeException {
         if (arguments.isEmpty()) {
-            ui.showError("The description of a deadline cannot be empty.");
-            return;
+            throw new DukeException("The description of a deadline cannot be empty.");
         }
         int byIndex = arguments.indexOf(" /by ");
         if (byIndex == -1) {
-            ui.showError("Please specify a deadline using /by.");
-            System.out.println(" Usage: deadline <description> /by <date>");
-            return;
+            throw new DukeException("Please specify a deadline using /by.\n"
+                    + " Usage: deadline <description> /by <date>");
         }
         String description = arguments.substring(0, byIndex).trim();
         String by = arguments.substring(byIndex + " /by ".length()).trim();
         if (description.isEmpty()) {
-            ui.showError("The description of a deadline cannot be empty.");
-            return;
+            throw new DukeException("The description of a deadline cannot be empty.");
         }
         if (by.isEmpty()) {
-            ui.showError("The deadline date cannot be empty.");
-            return;
+            throw new DukeException("The deadline date cannot be empty.");
         }
         Task task = new Deadline(description, by);
         tasks.addTask(task);
-        saveTasks(tasks, storage, ui);
-        ui.showTaskAdded(task, tasks.size());
+        saveTasks(tasks, storage);
+        return formatTaskAdded(task, tasks.size());
     }
 
-    private static void handleEvent(String arguments, TaskList tasks, Ui ui, Storage storage) {
+    private static String handleEvent(String arguments, TaskList tasks, Storage storage) throws DukeException {
         if (arguments.isEmpty()) {
-            ui.showError("The description of an event cannot be empty.");
-            return;
+            throw new DukeException("The description of an event cannot be empty.");
         }
         int fromIndex = arguments.indexOf(" /from ");
         int toIndex = arguments.indexOf(" /to ");
         if (fromIndex == -1 || toIndex == -1) {
-            ui.showError("Please specify event times using /from and /to.");
-            System.out.println(" Usage: event <description> /from <start> /to <end>");
-            return;
+            throw new DukeException("Please specify event times using /from and /to.\n"
+                    + " Usage: event <description> /from <start> /to <end>");
         }
         if (fromIndex > toIndex) {
-            ui.showError("Please put /from before /to.");
-            return;
+            throw new DukeException("Please put /from before /to.");
         }
         String description = arguments.substring(0, fromIndex).trim();
         String from = arguments.substring(fromIndex + " /from ".length(), toIndex).trim();
         String to = arguments.substring(toIndex + " /to ".length()).trim();
         if (description.isEmpty()) {
-            ui.showError("The description of an event cannot be empty.");
-            return;
+            throw new DukeException("The description of an event cannot be empty.");
         }
         if (from.isEmpty()) {
-            ui.showError("The start time cannot be empty.");
-            return;
+            throw new DukeException("The start time cannot be empty.");
         }
         if (to.isEmpty()) {
-            ui.showError("The end time cannot be empty.");
-            return;
+            throw new DukeException("The end time cannot be empty.");
         }
         Task task = new Event(description, from, to);
         tasks.addTask(task);
-        saveTasks(tasks, storage, ui);
-        ui.showTaskAdded(task, tasks.size());
+        saveTasks(tasks, storage);
+        return formatTaskAdded(task, tasks.size());
     }
 
     private static int parseTaskIndex(String arguments) throws DukeException {
@@ -179,11 +163,11 @@ public class Parser {
         }
     }
 
-    private static void saveTasks(TaskList tasks, Storage storage, Ui ui) {
+    private static void saveTasks(TaskList tasks, Storage storage) throws DukeException {
         try {
             storage.save(tasks.getAllTasks());
         } catch (Exception e) {
-            ui.showWarning("Could not save tasks to file.");
+            throw new DukeException("Could not save tasks to file.");
         }
     }
 }

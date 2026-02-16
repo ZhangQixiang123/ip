@@ -14,27 +14,45 @@ public class Duke {
 
     private Storage storage;
     private TaskList tasks;
-    private Ui ui;
+
+    public Duke() {
+        this(DATA_FILE_PATH);
+    }
 
     public Duke(String filePath) {
-        ui = new Ui();
         storage = new Storage(filePath);
         try {
             ArrayList<Task> loadedTasks = storage.load();
             tasks = new TaskList(loadedTasks);
         } catch (IOException e) {
-            ui.showWarning("Could not load tasks from file.");
             tasks = new TaskList();
         }
     }
 
+    /**
+     * Generates a response for the user's chat message.
+     */
+    public String getResponse(String input) {
+        try {
+            return Parser.processCommand(input, tasks, storage);
+        } catch (DukeException e) {
+            return "OOPS!!! " + e.getMessage();
+        }
+    }
+
     public void run() {
+        Ui ui = new Ui();
         ui.showWelcome();
         boolean isRunning = true;
         while (isRunning) {
             String input = ui.readCommand();
             ui.showLine();
-            isRunning = Parser.executeCommand(input, tasks, ui, storage);
+            String response = getResponse(input);
+            System.out.println(" " + response);
+            if (input.trim().equals("bye")) {
+                ui.showLine();
+                break;
+            }
             ui.showLine();
         }
         ui.close();
