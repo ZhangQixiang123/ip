@@ -39,10 +39,22 @@ public class MainWindow extends AnchorPane {
     private void handleUserInput() {
         String input = userInput.getText();
         String response = duke.getResponse(input);
+        DialogBox responseDialog = createResponseDialog(response);
         dialogContainer.getChildren().addAll(
                 DialogBox.getUserDialog(input, userImage),
-                DialogBox.getDukeDialog(response, dukeImage)
+                responseDialog
         );
         userInput.clear();
+    }
+
+    private DialogBox createResponseDialog(String response) {
+        if (isErrorResponse(response)) {
+            return DialogBox.getErrorDialog(response, dukeImage);
+        }
+        return DialogBox.getDukeDialog(response, dukeImage);
+    }
+
+    private boolean isErrorResponse(String response) {
+        return response.startsWith("OOPS!!!");
     }
 }

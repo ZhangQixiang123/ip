@@ -1,0 +1,44 @@
+.root {
+    -fx-background-color: #f0f0f0;
+    -fx-font-size: 13px;
+}
+
+.scroll-pane {
+    -fx-background-color: #f0f0f0;
+}
+
+.scroll-pane > .viewport {
+    -fx-background-color: #f0f0f0;
+}
+
+.dialog-box {
+    -fx-background-radius: 12;
+    -fx-padding: 6 10 6 10;
+}
+
+.user-dialog {
+    -fx-background-color: #d4e6f9;
+}
+
+.duke-dialog {
+    -fx-background-color: #e8e8e8;
+}
+
+.error-dialog {
+    -fx-background-color: #fdd;
+}
+
+.error-dialog .label {
+    -fx-text-fill: #8b0000;
+}
+
+#sendButton {
+    -fx-background-color: #4a86c8;
+    -fx-text-fill: white;
+    -fx-background-radius: 6;
+    -fx-cursor: hand;
+}
+
+#sendButton:hover {
+    -fx-background-color: #3a6ea8;
+}
