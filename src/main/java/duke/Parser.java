@@ -14,6 +14,9 @@ public class Parser {
      * Parses and executes a single user command, returning the response as a string.
      */
     public static String processCommand(String input, TaskList tasks, Storage storage) throws DukeException {
+        assert input != null : "User input should not be null";
+        assert tasks != null : "TaskList should not be null";
+        assert storage != null : "Storage should not be null";
         String command = getCommandWord(input);
         String arguments = getArguments(input);
 
@@ -34,9 +37,11 @@ public class Parser {
             return handleDeadline(arguments, tasks, storage);
         case "event":
             return handleEvent(arguments, tasks, storage);
+        case "find":
+            return handleFind(arguments, tasks);
         default:
             throw new DukeException("I don't know what that means :-(\n"
-                    + " Try: todo, deadline, event, list, mark, unmark, delete, bye");
+                    + " Try: todo, deadline, event, list, mark, unmark, delete, find, bye");
         }
     }
 
@@ -150,6 +155,29 @@ public class Parser {
         tasks.addTask(task);
         saveTasks(tasks, storage);
         return formatTaskAdded(task, tasks.size());
+    }
+
+    private static String handleFind(String arguments, TaskList tasks) throws DukeException {
+        if (arguments.isEmpty()) {
+            throw new DukeException("Please specify a keyword to search for.");
+        }
+        StringBuilder sb = new StringBuilder("Here are the matching tasks in your list:");
+        int matchCount = 0;
+        for (int i = 0; i < tasks.size(); i++) {
+            try {
+                Task task = tasks.getTask(i);
+                if (task.getDescription().contains(arguments)) {
+                    matchCount++;
+                    sb.append("\n ").append(matchCount).append(".").append(task);
+                }
+            } catch (DukeException e) {
+                // Should not happen during iteration
+            }
+        }
+        if (matchCount == 0) {
+            return "No matching tasks found.";
+        }
+        return sb.toString();
     }
 
     private static int parseTaskIndex(String arguments) throws DukeException {
