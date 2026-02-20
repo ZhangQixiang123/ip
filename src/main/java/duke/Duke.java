@@ -20,6 +20,7 @@ public class Duke {
     }
 
     public Duke(String filePath) {
+        assert filePath != null : "Data file path should not be null";
         storage = new Storage(filePath);
         try {
             ArrayList<Task> loadedTasks = storage.load();
@@ -33,8 +34,11 @@ public class Duke {
      * Generates a response for the user's chat message.
      */
     public String getResponse(String input) {
+        assert input != null : "User input should not be null";
         try {
-            return Parser.processCommand(input, tasks, storage);
+            String response = Parser.processCommand(input, tasks, storage);
+            assert response != null : "Response from parser should not be null";
+            return response;
         } catch (DukeException e) {
             return "OOPS!!! " + e.getMessage();
         }

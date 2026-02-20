@@ -21,6 +21,8 @@ public class Event extends Task {
 
     public Event(String description, String from, String to) {
         super(description);
+        assert from != null : "Event start time string should not be null";
+        assert to != null : "Event end time string should not be null";
         this.startDateTime = DateTimeParser.parse(from);
         this.endDateTime = DateTimeParser.parse(to);
         this.startString = from;
