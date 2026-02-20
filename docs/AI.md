@@ -24,3 +24,13 @@
 - **What**: Used Claude Code to audit the project against CS2103 iP grading requirements.
 - **How**: AI fetched the course website, identified missing tags, naming issues, and missing features, then fixed them systematically.
 - **Changes**: Renamed product title from "Duke" to "Fzjjs" in `Main.java`, added missing git tags to historical commits.
+
+### 5. Cross-Platform JAR Support
+- **What**: Used Claude Code to make the fat JAR work on Windows, macOS (Intel + ARM), and Linux.
+- **How**: AI added `runtimeOnly` JavaFX dependencies for all platform variants in `build.gradle` so the shadow JAR bundles native libraries for every OS.
+- **Changes**: `build.gradle` — added platform-specific JavaFX dependencies.
+
+### 6. Fix `bye` Command to Close Application
+- **What**: Used Claude Code to fix the `bye` command which displayed a farewell message but did not close the GUI window.
+- **How**: AI added a 1-second delay followed by `Platform.exit()` in `MainWindow.java` so the user can read the farewell before the app closes.
+- **Changes**: `src/main/java/duke/MainWindow.java` — added exit logic in `handleUserInput`.
