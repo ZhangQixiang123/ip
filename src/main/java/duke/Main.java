@@ -37,7 +37,7 @@ public class Main extends Application {
 
     private void configureStage(Stage stage, Scene scene) {
         stage.setScene(scene);
-        stage.setTitle("Duke");
+        stage.setTitle("Fzjjs");
         stage.setMinWidth(300);
         stage.setMinHeight(400);
     }
